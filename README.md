@@ -3,7 +3,6 @@ DataMining_FP
 
 Proyecto final de la materia Minería de Datos en PUCMM.
 
-Es proyecto tiene como objetivo utilizar las lecturas del acelerometro del móvil, para capturarlas, procesarlas y evaluarlas en un modelo de DataMining, para reconocer una de las actividades físicas ya predefinidas que el usuario está ejecutado.
+Este proyecto tiene como objetivo utilizar las lecturas del acelerometro del móvil, para capturarlas, procesarlas y evaluarlas en un modelo de DataMining, para reconocer una de las actividades físicas ya predefinidas que el usuario está ejecutado. Puede predecir si el usuario esta Caminando, Trotando, Sentado, Parado, Subiendo/Bajando escaleras. Se realizo una implementacion en un juego de Simon Dice (Simon Says).
 
-Desarrollado por: Ricardo Batista
-                  Richard Garcia
+Desarrollado por: Ricardo Batista, Richard Garcia
