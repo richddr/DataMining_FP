@@ -17,6 +17,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
+import javax.swing.SwingWorker;
 import weka.classifiers.trees.J48;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -169,12 +170,13 @@ public class interfaz extends javax.swing.JFrame {
                 .addContainerGap()
                 .addComponent(jLabel9)
                 .addGap(72, 72, 72)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(actividad_actual, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 52, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addGap(7, 7, 7)
-                        .addComponent(lbl_tiempo, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(lbl_tiempo, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(actividad_actual, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 52, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addGap(44, 44, 44)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
@@ -198,7 +200,7 @@ public class interfaz extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        String act_curr = SimonDice();//Se elije la actividad aleatoria
+        final String act_curr = SimonDice();//Se elije la actividad aleatoria
         actividad_anterior = act_curr;
         switch (act_curr) {
             case "Walking":
@@ -214,14 +216,27 @@ public class interfaz extends javax.swing.JFrame {
                 actividad_actual.setText("te quedes parado!");
                 break;
         }
+        if(javax.swing.SwingUtilities.isEventDispatchThread())
+            System.out.println("SE ESTA CORRIENDO EN EL EDT");
         
-        //Se llama la funcion que capturara los datos del smartphone
-        CapturaDatos();
-        
-        //Se evalua a ver si se predijo bien
-        Evaluacion_Actividad(act_curr);
-        
-        System.out.println("acaba de terminar una jugada");
+        SwingWorker worker = new SwingWorker<Void,Void>() {
+            @Override
+            protected Void doInBackground(){
+                //Se llama la funcion que capturara los datos del smartphone
+                CapturaDatos();
+                return null;
+            }
+            
+            @Override
+            public void done(){
+                //Se evalua a ver si se predijo bien
+                Evaluacion_Actividad(act_curr);
+                System.out.println("SE CORRIO LA BACKGROUND TASK");
+            }
+        };
+        worker.execute();
+        if(worker.isDone())
+            System.out.println("acaba de terminar una jugada");
         /*
         Para el calculo de tiempo:
         long tStart = System.currentTimeMillis();
@@ -580,7 +595,6 @@ public class interfaz extends javax.swing.JFrame {
                 new interfaz().setVisible(true);
             }
         });
-    
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
