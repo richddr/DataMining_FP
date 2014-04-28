@@ -6,6 +6,27 @@
 
 package DataMining_FP;
 
+import static DataMining_FP.interfaz.accelerometer_x_array;
+import static DataMining_FP.interfaz.accelerometer_y_array;
+import static DataMining_FP.interfaz.accelerometer_z_array;
+import static DataMining_FP.interfaz.actividad_curr;
+import static DataMining_FP.interfaz.bins;
+import static DataMining_FP.interfaz.data;
+import static DataMining_FP.interfaz.get_avg;
+import static DataMining_FP.interfaz.get_avg_absolute_difference;
+import static DataMining_FP.interfaz.get_avg_resultant_acceleration;
+import static DataMining_FP.interfaz.get_std_deviation;
+import static DataMining_FP.interfaz.maxmin;
+import static DataMining_FP.interfaz.numero_de_instancias;
+import static DataMining_FP.interfaz.prediccion;
+import static DataMining_FP.interfaz.puerto;
+import static DataMining_FP.interfaz.puntos_acumulados;
+import static DataMining_FP.interfaz.size;
+import static DataMining_FP.interfaz.tf_puntaje;
+import static DataMining_FP.interfaz.tiempo_de_lecturas;
+import static DataMining_FP.interfaz.tiempo_entre_picos;
+import static DataMining_FP.interfaz.tree;
+import static DataMining_FP.interfaz.ult_prediccion;
 import java.awt.Color;
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -22,6 +43,134 @@ import weka.classifiers.trees.J48;
 import weka.core.Instance;
 import weka.core.Instances;
 
+class sw_implementer extends SwingWorker<Void, Void>{
+
+    @Override
+    protected Void doInBackground(){
+        //Se llama la funcion que capturara los datos del smartphone
+        CapturaDatos();
+        return null;
+    }
+
+    @Override
+    public void done(){
+        //Se evalua a ver si se predijo bien
+        Evaluacion_Actividad(actividad_curr);
+        System.out.println("SE CORRIO LA BACKGROUND TASK");
+    }
+    
+    public static void CapturaDatos(){
+        int time_simulator = 200;
+        try{
+            // La IP es la local, el puerto es en el que el servidor esté escuchando.
+            DatagramSocket socket = new DatagramSocket(puerto);
+
+            // Un DatagramPacket para recibir los mensajes
+            DatagramPacket dato = new DatagramPacket(new byte[size], size);
+            
+            //displayTime(time_simulator);//Para simular un countdown
+            time_simulator -= 20;
+            
+            for (int i = 0; i < numero_de_instancias; i++) {
+                socket.receive(dato);
+                //System.out.print("Recibido dato de "+ dato.getAddress().getHostName() + " : ");
+                byte[] arreglo = dato.getData();
+                tiempo_de_lecturas[i] = System.currentTimeMillis();//lectura ne milisegundos
+
+                byte[] accelerometer_x_bytes = Arrays.copyOfRange(arreglo, 4, 8);//4, 8
+                byte[] accelerometer_y_bytes = Arrays.copyOfRange(arreglo, 8, 12);
+                byte[] accelerometer_z_bytes = Arrays.copyOfRange(arreglo, 12, 16);
+
+                accelerometer_x_array[i] = ByteBuffer.wrap(accelerometer_x_bytes).order(ByteOrder.LITTLE_ENDIAN).getFloat()*10f;
+                accelerometer_y_array[i] = ByteBuffer.wrap(accelerometer_y_bytes).order(ByteOrder.LITTLE_ENDIAN).getFloat()*10f;
+                accelerometer_z_array[i] = ByteBuffer.wrap(accelerometer_z_bytes).order(ByteOrder.LITTLE_ENDIAN).getFloat()*10f;
+
+                //Imprimiendo cada una de las lecturas
+                System.out.println(i + 1 + " [X=" + accelerometer_x_array[i] + "]   \t\t\t" + "[Y=" + accelerometer_y_array[i] + "]   \t\t\t" + "[Z=" + accelerometer_z_array[i] + "]");
+                
+                /*
+                if(time_simulator == (numero_de_instancias - i))
+                {
+                    displayTime(time_simulator);
+                    time_simulator -= 20;
+                }*/
+            }
+        }
+        catch(Exception e){
+            System.out.println("Error capturando los datos del smartphone");
+        }
+    }
+    
+    private static void Evaluacion_Actividad(String SimonDijo){
+        //Esta funcion recibe la actividad aleatoria de que genero SimonDice()
+        //Luego se evalua con el arbol para ver si se predice correctamente y en base
+        //a esto se le atriburan puntos al jugador.
+        String resultado_prediccion = null;
+        try {
+            int num = 1150;//Un numero cualquiera
+            Instance nueva_entrada = data.instance(num);//Crear una copia
+
+            //Modificando los valores
+            //Agregar los valores de los bins
+            float[] bins_result_x = bins(maxmin(accelerometer_x_array), accelerometer_x_array);
+            float[] bins_result_y = bins(maxmin(accelerometer_y_array), accelerometer_y_array);
+            float[] bins_result_z = bins(maxmin(accelerometer_z_array), accelerometer_z_array);
+            
+            for (int i = 0; i < 10; i++) {
+                nueva_entrada.setValue(i, bins_result_x[i]);//bins_x
+                nueva_entrada.setValue(i + 10, bins_result_y[i]);//bins_y
+                nueva_entrada.setValue(i + 20, bins_result_z[i]);//bins_z
+            }
+
+            //AVG
+            nueva_entrada.setValue(30,get_avg(accelerometer_x_array));
+            nueva_entrada.setValue(31,get_avg(accelerometer_y_array));
+            nueva_entrada.setValue(32,get_avg(accelerometer_z_array));
+
+            //PEAK
+            nueva_entrada.setValue(33,tiempo_entre_picos(accelerometer_x_array,tiempo_de_lecturas));
+            nueva_entrada.setValue(34,tiempo_entre_picos(accelerometer_y_array,tiempo_de_lecturas));
+            nueva_entrada.setValue(35,tiempo_entre_picos(accelerometer_z_array,tiempo_de_lecturas));
+
+            //ABSOLDEV
+            nueva_entrada.setValue(36,get_avg_absolute_difference(accelerometer_x_array));
+            nueva_entrada.setValue(37,get_avg_absolute_difference(accelerometer_y_array));
+            nueva_entrada.setValue(38,get_avg_absolute_difference(accelerometer_z_array));
+
+            //STANDDEV
+            nueva_entrada.setValue(39,get_std_deviation(accelerometer_x_array));
+            nueva_entrada.setValue(40,get_std_deviation(accelerometer_y_array));
+            nueva_entrada.setValue(41,get_std_deviation(accelerometer_z_array));
+
+            //RESULTANT
+            nueva_entrada.setValue(42,get_avg_resultant_acceleration(accelerometer_x_array,accelerometer_y_array,accelerometer_z_array));
+            double clsLabel = tree.classifyInstance(nueva_entrada); // Clasificando una nueva instancia
+            resultado_prediccion = data.classAttribute().value((int) clsLabel);
+            
+            //Se actualiza lo que predijo en el textfield
+            prediccion.setText(resultado_prediccion);
+            //System.out.println("\n\n\n[resultado = "+resultado_prediccion+"]");
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Error al predecir la instancia capturada");
+        }
+        
+        //verificamos si el algoritmo logro predecir la actividad correctamente
+        if(SimonDijo.equals(resultado_prediccion)){//Predijo correctamente!
+            if(!ult_prediccion)//Si en la ultima vez que jugo no se predijo correctamente solo sumamos un punto.
+                puntos_acumulados++;
+            else//se ha predecido bien >= 2 veces
+                puntos_acumulados+=2;
+        }
+        else{//No se predijo bien
+            if(puntos_acumulados > 0)//si no tiene puntos acumulados, no se le resta nada, de lo contrario se le quita un punto
+                puntos_acumulados--;
+        }
+        tf_puntaje.setText(String.valueOf(puntos_acumulados));
+        
+    }
+}
+
 /**
  *
  * @author Richard Garcia
@@ -37,6 +186,7 @@ public class interfaz extends javax.swing.JFrame {
     static int puntos_acumulados = 0;
     static boolean ult_prediccion = false;//para fines de bonos
     static String actividad_anterior = null;
+    static String actividad_curr;
     public static String[] actividades = {"Walking", "Jogging", "Sitting", "Standing"};
     /*
     Walking
@@ -86,8 +236,10 @@ public class interfaz extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-        jLabel9.setFont(new java.awt.Font("Segoe UI Semibold", 3, 24)); // NOI18N
+        jLabel9.setFont(new java.awt.Font("Segoe WP", 3, 24)); // NOI18N
+        jLabel9.setForeground(new java.awt.Color(0, 0, 255));
         jLabel9.setText("SIMON DICE!");
+        jLabel9.setToolTipText("");
 
         jLabel1.setFont(new java.awt.Font("Tahoma", 0, 24)); // NOI18N
         jLabel1.setText("SIMON DICE QUE:");
@@ -112,17 +264,20 @@ public class interfaz extends javax.swing.JFrame {
 
         actividad_actual.setEditable(false);
         actividad_actual.setFont(new java.awt.Font("Tahoma", 0, 24)); // NOI18N
+        actividad_actual.setFocusable(false);
 
         jLabel2.setFont(new java.awt.Font("Tahoma", 0, 24)); // NOI18N
         jLabel2.setText("PREDICCION:");
 
         prediccion.setEditable(false);
         prediccion.setFont(new java.awt.Font("Tahoma", 0, 24)); // NOI18N
+        prediccion.setFocusable(false);
 
         jLabel3.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
         jLabel3.setText("PUNTAJE:");
 
         tf_puntaje.setEditable(false);
+        tf_puntaje.setFocusable(false);
         tf_puntaje.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 tf_puntajeActionPerformed(evt);
@@ -181,7 +336,7 @@ public class interfaz extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
                     .addComponent(prediccion, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 80, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 81, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -202,6 +357,7 @@ public class interfaz extends javax.swing.JFrame {
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         final String act_curr = SimonDice();//Se elije la actividad aleatoria
         actividad_anterior = act_curr;
+        actividad_curr = act_curr;
         switch (act_curr) {
             case "Walking":
                 actividad_actual.setText("Camines!");
@@ -218,7 +374,8 @@ public class interfaz extends javax.swing.JFrame {
         }
         if(javax.swing.SwingUtilities.isEventDispatchThread())
             System.out.println("SE ESTA CORRIENDO EN EL EDT");
-        
+        (new sw_implementer()).execute();
+        /*
         SwingWorker worker = new SwingWorker<Void,Void>() {
             @Override
             protected Void doInBackground(){
@@ -237,12 +394,6 @@ public class interfaz extends javax.swing.JFrame {
         worker.execute();
         if(worker.isDone())
             System.out.println("acaba de terminar una jugada");
-        /*
-        Para el calculo de tiempo:
-        long tStart = System.currentTimeMillis();
-        long tEnd = System.currentTimeMillis();
-        long tDelta = tEnd - tStart;
-        double elapsedSeconds = tDelta / 1000.0;
         */
     }//GEN-LAST:event_jButton1ActionPerformed
     
@@ -606,7 +757,7 @@ public class interfaz extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel9;
     private javax.swing.JLabel lbl_tiempo;
-    private javax.swing.JTextField prediccion;
-    private javax.swing.JTextField tf_puntaje;
+    public static javax.swing.JTextField prediccion;
+    public static javax.swing.JTextField tf_puntaje;
     // End of variables declaration//GEN-END:variables
 }
