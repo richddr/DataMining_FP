@@ -144,7 +144,7 @@ public class interfaz extends javax.swing.JFrame {
 
         jLabel5.setText("Acertar correctamente dos o mas veces: 30 puntos");
 
-        jLabel6.setText("Acertar incorrectamente: -4 puntos");
+        jLabel6.setText("No acertar correctamente: -4 puntos");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);

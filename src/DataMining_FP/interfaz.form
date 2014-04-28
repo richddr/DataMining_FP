@@ -241,7 +241,7 @@
     </Component>
     <Component class="javax.swing.JLabel" name="jLabel6">
       <Properties>
-        <Property name="text" type="java.lang.String" value="Acertar incorrectamente: -4 puntos"/>
+        <Property name="text" type="java.lang.String" value="No acertar correctamente: -4 puntos"/>
       </Properties>
     </Component>
   </SubComponents>
