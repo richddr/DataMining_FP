@@ -93,7 +93,7 @@ public class interfaz extends javax.swing.JFrame {
         jLabel1.setText("SIMON DICE QUE:");
 
         jButton1.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
-        jButton1.setForeground(new java.awt.Color(0, 255, 0));
+        jButton1.setForeground(new java.awt.Color(0, 102, 0));
         jButton1.setText("INICIO!");
         jButton1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -238,7 +238,6 @@ public class interfaz extends javax.swing.JFrame {
     private void displayTime(int tiempo){
         tiempo /= 20;
         lbl_tiempo.setText(String.valueOf(tiempo));
-        lbl_tiempo.setForeground(Color.GREEN);
     }
     
     public void CapturaDatos(){
@@ -252,7 +251,7 @@ public class interfaz extends javax.swing.JFrame {
             
             displayTime(time_simulator);//Para simular un countdown
             time_simulator -= 20;
-            
+            System.out.println("--------------------------------------\n");
             for (int i = 0; i < numero_de_instancias; i++) {
                 socket.receive(dato);
                 //System.out.print("Recibido dato de "+ dato.getAddress().getHostName() + " : ");
@@ -277,6 +276,7 @@ public class interfaz extends javax.swing.JFrame {
                 }
             }
             socket.close();//CERRAMOS EL SOCKET
+            System.out.println("--------------------------------------\n\n\n");
         }
         catch(Exception e){
             System.out.println("Error capturando los datos del smartphone");
