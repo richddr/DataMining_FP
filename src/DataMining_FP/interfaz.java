@@ -132,6 +132,11 @@ public class interfaz extends javax.swing.JFrame {
             }
         });
 
+        lbl_tiempo.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
+        lbl_tiempo.setForeground(new java.awt.Color(0, 0, 255));
+        lbl_tiempo.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        lbl_tiempo.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -142,7 +147,7 @@ public class interfaz extends javax.swing.JFrame {
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel3)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(tf_puntaje, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(tf_puntaje, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 104, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
@@ -195,7 +200,7 @@ public class interfaz extends javax.swing.JFrame {
                         .addComponent(jLabel3)
                         .addGap(64, 64, 64))
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(tf_puntaje, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(tf_puntaje, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addContainerGap())))
         );
 
@@ -205,7 +210,7 @@ public class interfaz extends javax.swing.JFrame {
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         final String act_curr = SimonDice();//Se elije la actividad aleatoria
         actividad_anterior = act_curr;
-        prediccion.setText(act_curr);
+        prediccion.setText("");//borramos lo que dice el txtbx prediccion, si tenia algo
         switch (act_curr) {
             case "Walking":
                 actividad_actual.setText("Camines!");
@@ -527,8 +532,10 @@ public class interfaz extends javax.swing.JFrame {
                 puntos_acumulados+=30;
         }
         else{//No se predijo bien
-            if(puntos_acumulados > 0)//si no tiene puntos acumulados, no se le resta nada, de lo contrario se le quita un punto
+            if((puntos_acumulados-4) > 0)//si no tiene puntos acumulados, no se le resta nada, de lo contrario se le quita un punto
                 puntos_acumulados-=4;
+            else
+                puntos_acumulados = 0;
         }
         tf_puntaje.setText(String.valueOf(puntos_acumulados));
         
