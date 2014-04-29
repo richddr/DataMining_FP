@@ -22,8 +22,8 @@ import weka.core.Instance;
 import weka.core.Instances;
 /**
  *
- * @author Richard Garcia
- *         Ricardo Batista
+ * @author Richard Garcia 2010-0553
+ *         Ricardo Batista 2009-0252
  */
 public class interfaz extends javax.swing.JFrame {
     //Para el arbol/weka library    
@@ -192,12 +192,12 @@ public class interfaz extends javax.swing.JFrame {
                 .addContainerGap()
                 .addComponent(jLabel9)
                 .addGap(21, 21, 21)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 52, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(actividad_actual, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(layout.createSequentialGroup()
                         .addGap(10, 10, 10)
-                        .addComponent(lbl_tiempo, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(lbl_tiempo, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 52, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel2)
@@ -319,6 +319,9 @@ public class interfaz extends javax.swing.JFrame {
         System.out.println("Weka inicio bien");
     }
     
+    /*
+    * Funcion que retorna los maximos y minimos de un arreglo
+    */
     public static float[] maxmin(float[] arreglo){
        
        float[] resultados = new float[2];
@@ -335,7 +338,10 @@ public class interfaz extends javax.swing.JFrame {
        }
        return resultados;
    }
-       
+    
+   /*
+    * Funcion que calcula y retorna los "bins" de un eje especifico
+    */
    public static float[] bins(float[] rango_maxmin, float[] lecturas_del_eje){
        
        float[] bins = new float[10];
@@ -367,6 +373,9 @@ public class interfaz extends javax.swing.JFrame {
        return bins; 
    }
    
+   /*
+   * Funcion que calcula y retorna los "peaks" de un eje especifico
+   */
    public static float tiempo_entre_picos(float[] lecturas_del_eje,long[] tiempos){
        long resultado = 0;
        List indices_de_picos_dentro_del_umbral = new LinkedList();
@@ -421,6 +430,9 @@ public class interfaz extends javax.swing.JFrame {
        return resultado;
    }
 
+   /*
+   * Funcion que calcula el avg(mean) de un arreglo
+   */
    public static float get_avg(float[] lecturas_del_eje)
    {
        float avg = 0;
@@ -435,6 +447,9 @@ public class interfaz extends javax.swing.JFrame {
        return avg;
    }
 
+   /*
+   * Funcion que calcula la deviacion estandar de un arreglo
+   */
    public static float get_std_deviation(float[] lecturas_del_eje)
    {
        //primero calculamos el average
@@ -450,6 +465,9 @@ public class interfaz extends javax.swing.JFrame {
        return std_dev;
    }
 
+   /*
+   * Funcion que calcula el avg(mean) de la diferencia absoluta
+   */
    public static float get_avg_absolute_difference(float[] lecturas_del_eje)
    {
        //se calcula el average de las 200 medidas del eje a analizar
@@ -461,6 +479,9 @@ public class interfaz extends javax.swing.JFrame {
        return abs_avg_diff;
    }
 
+   /*
+   * Funcion que calcula la media de la aceleracion resultante
+   */
    public static float get_avg_resultant_acceleration(float[] eje_x, float[] eje_y, float[] eje_z)
    {
        float avg_resultant_acceleration = 0;
@@ -470,6 +491,9 @@ public class interfaz extends javax.swing.JFrame {
        return avg_resultant_acceleration;
    }
     
+   /*
+   * Funcion que calcula una actividad aleatoria a realizar por el usuario
+   */
     private String SimonDice(){
         //Esta funcion retorna un random de las actividad a realizar.
       
@@ -485,10 +509,12 @@ public class interfaz extends javax.swing.JFrame {
         return act_curr;
     }
     
+    /*
+    * Esta funcion recibe la actividad aleatoria de que genero SimonDice()
+    * Luego se evalua con el arbol para ver si se predice correctamente y en base
+    * a esto se le atriburan puntos al jugador.
+    */
     private void Evaluacion_Actividad(String SimonDijo){
-        //Esta funcion recibe la actividad aleatoria de que genero SimonDice()
-        //Luego se evalua con el arbol para ver si se predice correctamente y en base
-        //a esto se le atriburan puntos al jugador.
         String resultado_prediccion = null;
         try {
             int num = 1150;//Un numero cualquiera
